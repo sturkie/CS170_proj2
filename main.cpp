@@ -11,6 +11,21 @@ using namespace std;
 vector< vector<double> > data;
 vector< vector<double> > features;
 
+
+int calculate_accuracy(vector< vector<double> > data, vector<int> current_set, int feature_to_add){
+    double object_to_classify = 0;
+    int label_object_to_classify = 0;
+    //adjust data
+    
+    //get accuracy
+    for(int i = 1; i < data.size(); i++){
+        cout << "Looping over i, at the " << i << "-th location\n";
+        cout << "\tThe " << i << "-th object is in class " << data[i][0] <<
+        "\n";
+    }
+    return 0;
+}
+
 int fake_cross_validation(vector< vector<double> > data, vector<int> current_set, int feature_to_add){
     return rand() % 100;
 }
@@ -42,6 +57,7 @@ void fwd_feature_search(vector< vector<double> > data){
             else{
                 cout << "\tConsidering adding the " << j << "-th feature\n";
                 accuracy = fake_cross_validation(data,current_set,j);
+                calculate_accuracy(data, current_set, feature_to_add_at_this_level);
                 if(accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
                     feature_to_add_at_this_level = j;
@@ -51,12 +67,7 @@ void fwd_feature_search(vector< vector<double> > data){
         current_set.push_back(feature_to_add_at_this_level);
         cout << "On level " << i << " added the " << feature_to_add_at_this_level << "-th feature to current set!\n";
     }
-    /*
-    cout << "This is current set: \n";
-    for(int i = 0; i < current_set.size(); i++){
-        cout << current_set[i] << " ";
-    }
-    cout << endl;*/
+    
     return;
 }
 
@@ -129,16 +140,6 @@ int process_data(string filename){
     return 0;
 }
 
-void forward_selection(){
-    fwd_feature_search(data);
-    return;
-}
-
-void backward_elimination(){
-    be_feature_search(data);
-    return;
-}
-
 int main(){
     srand (time(NULL)); //to get random number
     
@@ -156,11 +157,10 @@ int main(){
     
     //input file
     cout << "Type in the name of the file to test: ";
-    //cin >> filename;
+    cin >> filename;
     
     
-    //default for testing
-    cout << f1;
+    //FOR TESTING ONLY::: default for testing
     filename = f1;
 
     
@@ -188,11 +188,11 @@ int main(){
     
     if(algorithm == 1){
         cout << "\nStarting forward selection...\n";
-        forward_selection();
+        fwd_feature_search(data);
     }
     else if(algorithm == 2){
         cout << "\nStarting backward elimination...\n";
-        backward_elimination();
+        be_feature_search(data);
     }
     
     cout << endl;
