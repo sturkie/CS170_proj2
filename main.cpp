@@ -27,10 +27,10 @@ void clean_data(vector< vector< double > > data, vector<int> current_set, int fe
     current_set.push_back(feature_to_add);
     adjusted_data = data;
     
-    //cout << "\nTHIS IS OUR CURRENT SET: \n";
-    for(int i = 0; i < current_set.size(); i++){
-        cout << current_set[i] << " " ;
-    }
+//    //cout << "\nTHIS IS OUR CURRENT SET: \n";
+//    for(int i = 0; i < current_set.size(); i++){
+//        cout << current_set[i] << " " ;
+//    }
     
 //    for(int i = 0; i < current_set.size(); i++){
 //        //everything not in the current_set, set to 0
@@ -185,7 +185,7 @@ void fwd_feature_search(vector< vector<double> > data){
             }
         }
         current_set.push_back(feature_to_add_at_this_level);
-        cout << "Feature set {" << feature_to_add_at_this_level << "} was best at an accuarcy of " << best_so_far_accuracy << "%\n\n";
+        cout << "Feature set {" << feature_to_add_at_this_level << "} was best at an accuracy of " << best_so_far_accuracy << "%\n\n";
         cout << "On level " << i << " added the " << feature_to_add_at_this_level << "-th feature to current set!\n";
     }
     cout << "Search completed.\nThe best feature subset is {";
@@ -196,9 +196,81 @@ void fwd_feature_search(vector< vector<double> > data){
     return;
 }
 
+
+double calculate_accuracy_be(vector< vector<double> > data, vector<int> current_set, int feature_to_remove){
+    
+    //clean data
+    for(int k = 0; k < current_set.size(); k++){
+        if(current_set[k] == feature_to_remove){
+            current_set.erase(current_set.begin()+k);
+        }
+    }
+    adjusted_data = data;
+    
+    for(int i = 0; i < data.size(); i++){
+        for(int j = 0; j < data[i].size(); j++){
+            //adjusted_data[i][j] = 0;
+            if(exists_in(j, current_set)){
+                //leave it alone! we want it
+            }
+               else{
+                adjusted_data[i][j] = 0;
+            }
+        }
+    }
+    
+    vector<double> object_to_classify;
+    int label_object_to_classify = 0;
+    int label_nearest_neighbor = 0;
+    
+    double number_correctly_classified = 0;
+    
+    //double distance = 0;
+    //adjust data
+    
+    //get accuracy
+    for(int i = 0; i < data.size(); i++){ //# of total data
+        object_to_classify = adjusted_data[i];
+        label_object_to_classify = data[i][0];
+        
+        double nearest_neighbor_distance = 90000;
+        double nearest_neighbor_location = 90000;
+        double distance = 0;
+        //cout << "\tLooping over i, at the " << i+1 << "-th location\n";
+        //cout << "\t\tThe " << i << "-th object is in class " << data[i][0] << "\n";
+        for(int k = 0; k < data.size(); k++){ //# of total data
+            if(!(k == i)){
+                //cout << "\tAsk if object " << i+1 << " is nearest neighbor with " << k+1 <<"\n";
+                distance = calculate_distance(object_to_classify, adjusted_data[k]);
+//                for(int h = 0; h < object_to_classify.size(); h++){
+//                    distance = distance + pow((object_to_classify[h]-data[k][h]),2);
+//                }
+//                distance = sqrt(distance);
+                if(distance < nearest_neighbor_distance){
+                    nearest_neighbor_distance = distance;
+                    nearest_neighbor_location = k;
+                    label_nearest_neighbor = data[k][0];
+                }
+            }
+        }
+//        cout << "\nObject " << i << " is class " << label_object_to_classify;
+//        cout << "\nIts nearest_neighbor is " << nearest_neighbor_location << " which is in class " << label_nearest_neighbor << "\n";
+        if(label_object_to_classify == label_nearest_neighbor){
+            number_correctly_classified++;
+            //cout << "Adding\n";
+        }
+        
+    }
+    //cout << "Accuracy is: " << (number_correctly_classified / data.size())*100 << "\n";
+    return (number_correctly_classified / data.size())*100;
+}
+
 void be_feature_search(vector< vector<double> > data){
     vector<int> current_set;
-    int accuracy = 0;
+    double accuracy = 0;
+    vector<int> whatif_current_set;
+    double highest_accuracy_reached = 0;
+    vector<int> best_set;
     
     //populate current_set with all our features
     for(int i = 1; i < data[0].size(); i++){
@@ -211,12 +283,17 @@ void be_feature_search(vector< vector<double> > data){
         int best_so_far_accuracy = 0;
         for(int j = 1; j < data[0].size(); j++){
             if(is_in_set(j,current_set)){
-                cout << "\tConsider removing the " << j << "-th feature\n";
+                //cout << "\tConsider removing the " << j << "-th feature\n";
                 //accuracy = fake_cross_validation(data,current_set,j);
-                accuracy = calculate_accuracy(data, current_set, j);
+                accuracy = calculate_accuracy_be(data, current_set, j);
+                cout << "\tUsing features(s) {" << j <<"} accuracy is " << accuracy << "%\n";
                 if(accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
                     feature_to_remove_at_this_level = j;
+                    if(best_so_far_accuracy > highest_accuracy_reached){
+                        highest_accuracy_reached = best_so_far_accuracy;
+                        best_set = current_set;
+                    }
                 }
             }
         }
@@ -225,9 +302,15 @@ void be_feature_search(vector< vector<double> > data){
                 current_set.erase(current_set.begin()+k);
             }
         }
-        cout << "On level " << i << " removed the " << feature_to_remove_at_this_level << "-th feature to current set!\n";
+        cout << "Feature set {" << feature_to_remove_at_this_level << "} was best at an accuracy of " << best_so_far_accuracy << "%\n\n";
+        cout << "On level " << i << " removed the " << feature_to_remove_at_this_level << "-th feature from the current set!\n";
+        //cout << "On level " << i << " removed the " << feature_to_remove_at_this_level << "-th feature to current set!\n";
     }
-    
+    cout << "Search completed.\nThe best feature subset is {";
+    for(int i = 0; i < best_set.size(); i++){
+        cout << best_set[i] << " ";
+    }
+    cout << "} with an accuracy of " << highest_accuracy_reached << "%!\n";
     return;
 }
 
