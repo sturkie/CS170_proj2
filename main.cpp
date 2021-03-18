@@ -26,13 +26,13 @@ bool is_in_set(int j, vector<int> current_set){
 }
 
 
-void feature_search(vector< vector<double> > data){
+void fwd_feature_search(vector< vector<double> > data){
     
     vector<int> current_set;
     int accuracy = 0;
     
     for(int i = 1; i < data[0].size(); i++){
-        cout << "On the " << i << "-th level of the search tree\n";
+        cout << "\nOn the " << i << "-th level of the search tree...\n";
         int feature_to_add_at_this_level;
         int best_so_far_accuracy = 0;
         for(int j = 1; j < data[0].size(); j++){
@@ -49,12 +49,52 @@ void feature_search(vector< vector<double> > data){
             }
         }
         current_set.push_back(feature_to_add_at_this_level);
-        cout << "On level " << i << " added the " << feature_to_add_at_this_level << "-th feature to current set\n";
+        cout << "On level " << i << " added the " << feature_to_add_at_this_level << "-th feature to current set!\n";
     }
+    /*
+    cout << "This is current set: \n";
+    for(int i = 0; i < current_set.size(); i++){
+        cout << current_set[i] << " ";
+    }
+    cout << endl;*/
     return;
 }
 
-void process_data(string filename){
+void be_feature_search(vector< vector<double> > data){
+    vector<int> current_set;
+    int accuracy = 0;
+    
+    //populate current_set with all our features
+    for(int i = 1; i < data[0].size(); i++){
+        current_set.push_back(i);
+    }
+
+    for(int i = 1; i < data[0].size(); i++){
+        cout << "\nOn the " << i << "-th level of the search tree...\n";
+        int feature_to_remove_at_this_level;
+        int best_so_far_accuracy = 0;
+        for(int j = 1; j < data[0].size(); j++){
+            if(is_in_set(j,current_set)){
+                cout << "\tConsider removing the " << j << "-th feature\n";
+                accuracy = fake_cross_validation(data,current_set,j);
+                if(accuracy > best_so_far_accuracy){
+                    best_so_far_accuracy = accuracy;
+                    feature_to_remove_at_this_level = j;
+                }
+            }
+        }
+        for(int k = 0; k < current_set.size(); k++){
+            if(current_set[k] == feature_to_remove_at_this_level){
+                current_set.erase(current_set.begin()+k);
+            }
+        }
+        cout << "On level " << i << " removed the " << feature_to_remove_at_this_level << "-th feature to current set!\n";
+    }
+    
+    return;
+}
+
+int process_data(string filename){
     string line;
     int num_instances=0;
     int num_features=0;
@@ -82,18 +122,20 @@ void process_data(string filename){
     }
     else{
         cout << "Error opening file!\n";
+        return -1;
     }
     
     cout << "This dataset has " << num_features << " features (not including the class attribute), and has " << num_instances << " instances\n";
-    return;
+    return 0;
 }
 
 void forward_selection(){
-    feature_search(data);
+    fwd_feature_search(data);
     return;
 }
 
 void backward_elimination(){
+    be_feature_search(data);
     return;
 }
 
@@ -101,6 +143,8 @@ int main(){
     srand (time(NULL)); //to get random number
     
     string filename;
+    string f1 = "CS170_small_special_testdata__95.txt";
+    string f2 = "CS170_largetestdata__56.txt";
     int algorithm = 1; //default to forward
 
     
@@ -116,8 +160,8 @@ int main(){
     
     
     //default for testing
-    cout << "CS170_small_special_testdata__95.txt";
-    filename = "CS170_small_special_testdata__95.txt";
+    cout << f1;
+    filename = f1;
 
     
     //choose algorithm
@@ -128,7 +172,10 @@ int main(){
     
     //process data
     cout << "\nProcessing data ... \n\t";
-    process_data(filename);
+    if(process_data(filename) == -1){
+        cout << "Exiting\n";
+        return -1;
+    };
     
     
     //print data for checking
@@ -144,7 +191,7 @@ int main(){
         forward_selection();
     }
     else if(algorithm == 2){
-        cout << "Starting backward elimination...\n";
+        cout << "\nStarting backward elimination...\n";
         backward_elimination();
     }
     
