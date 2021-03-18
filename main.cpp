@@ -176,7 +176,9 @@ void fwd_feature_search(vector< vector<double> > data){
                     best_so_far_accuracy = accuracy;
                     feature_to_add_at_this_level = j;
                     if(best_so_far_accuracy > highest_accuracy_reached){
-                        //best_set = current_set;
+                        whatif_current_set = current_set;
+                        whatif_current_set.push_back(feature_to_add_at_this_level);
+                        best_set = whatif_current_set;
                         highest_accuracy_reached = best_so_far_accuracy;
                     }
                 }
@@ -210,7 +212,8 @@ void be_feature_search(vector< vector<double> > data){
         for(int j = 1; j < data[0].size(); j++){
             if(is_in_set(j,current_set)){
                 cout << "\tConsider removing the " << j << "-th feature\n";
-                accuracy = fake_cross_validation(data,current_set,j);
+                //accuracy = fake_cross_validation(data,current_set,j);
+                accuracy = calculate_accuracy(data, current_set, j);
                 if(accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
                     feature_to_remove_at_this_level = j;
@@ -289,7 +292,7 @@ int main(){
     
     
     //FOR TESTING ONLY::: default for testing
-    filename = f3;
+    filename = f1;
 
     
     //choose algorithm
