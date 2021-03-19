@@ -353,13 +353,8 @@ int main(){
     srand (time(NULL)); //to get random number
     
     string filename;
-    string f1 = "CS170_small_special_testdata__95.txt";
+    string f1 = "CS170_SMALLtestdata__5.txt";
     string f2 = "CS170_largetestdata__56.txt";
-    string f3 = "my_fake_set.txt";
-    string f4 = "CS170_small_special_testdata__96.txt";
-    string f5 = "CS170_small_special_testdata__97.txt";
-    string f6 = "CS170_small_special_testdata__98.txt";
-    string f7 = "CS170_small_special_testdata__99.txt";
     int algorithm = 1; //default to forward
 
     
@@ -375,11 +370,11 @@ int main(){
     
     
     //FOR TESTING ONLY::: default for testing
-    filename = f1;
+    //filename = f1;
 
     
     //choose algorithm
-    cout << "Type the number of the algoirthm you want to run: ";
+    cout << "Type the number of the algorithm you want to run: ";
     cout << "\n\t (1) Forward selection \n\t (2) Backward Elimination\n";
     cin >> algorithm;
     
